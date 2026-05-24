@@ -1,5 +1,7 @@
-Veiw my project on 
-      telemedicine-chatbot.vercel.app
+ 🌍 Deployment
+
+- Live Website: https://telemedicine-chatbot.vercel.app
+- Hosted on Vercel
 
 
 MediAssist AI 🏥
