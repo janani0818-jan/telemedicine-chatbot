@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>MediAssist AI</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f0f4f8;--surface:#fff;--surface2:#f7fafc;
+  --border:#e2e8f0;--border2:#cbd5e0;
+  --primary:#1a6db5;--primary-dark:#0f4c8a;--primary-light:#e8f1fb;
+  --accent:#00b4d8;--accent-light:#e0f7fb;
+  --success:#16a34a;--success-light:#dcfce7;
+  --warning:#d97706;--warning-light:#fef3c7;
+  --danger:#dc2626;--danger-light:#fee2e2;
+  --text:#1a202c;--text2:#4a5568;--text3:#718096;
+  --radius:12px;--radius-sm:8px;--radius-lg:18px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 4px 16px rgba(0,0,0,.06);
+  --shadow-lg:0 4px 24px rgba(0,0,0,.12);
+  --font:'DM Sans',sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+button{font-family:var(--font);cursor:pointer;border:none;outline:none}
+input,select,textarea{font-family:var(--font)}
+
+/* ── Layout ── */
+.app-shell{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:220px;background:var(--primary-dark);display:flex;flex-direction:column;flex-shrink:0;overflow:hidden}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:56px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:12px;flex-shrink:0}
+.content{flex:1;overflow-y:auto;padding:24px}
+
+/* ── Sidebar ── */
+.sidebar-logo{padding:20px 16px 12px;display:flex;align-items:center;gap:10px}
+.logo-icon{width:34px;height:34px;background:var(--accent);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px}
+.logo-text{color:#fff;font-weight:600;font-size:15px;line-height:1.1}
+.logo-sub{color:rgba(255,255,255,.5);font-size:10px}
+.nav-section{padding:8px 0;border-top:1px solid rgba(255,255,255,.08)}
+.nav-label{color:rgba(255,255,255,.35);font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:8px 16px 4px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 16px;color:rgba(255,255,255,.65);font-size:13.5px;font-weight:500;cursor:pointer;transition:all .15s;border-left:3px solid transparent;position:relative}
+.nav-item:hover{background:rgba(255,255,255,.07);color:#fff}
+.nav-item.active{background:rgba(255,255,255,.12);color:#fff;border-left-color:var(--accent)}
+.nav-item .badge{background:var(--danger);color:#fff;font-size:10px;border-radius:99px;padding:1px 6px;margin-left:auto}
+.nav-icon{font-size:16px;width:18px;text-align:center}
+.sidebar-footer{margin-top:auto;padding:12px 16px;border-top:1px solid rgba(255,255,255,.08)}
+.sidebar-user{display:flex;align-items:center;gap:9px;cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+.sidebar-user-info{flex:1;overflow:hidden}
+.sidebar-user-name{color:#fff;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-user-role{color:rgba(255,255,255,.4);font-size:11px}
+.role-switcher{display:flex;gap:6px;padding:12px 16px 8px}
+.role-btn{flex:1;background:rgba(255,255,255,.08);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1);border-radius:6px;font-size:10px;font-weight:600;padding:4px 2px;cursor:pointer;transition:all .15s}
+.role-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ── Topbar ── */
+.topbar-title{font-weight:600;font-size:15px;color:var(--text);flex:1}
+.topbar-actions{display:flex;align-items:center;gap:8px}
+.icon-btn{width:34px;height:34px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:all .15s;color:var(--text2)}
+.icon-btn:hover{background:var(--border);color:var(--text)}
+.pill{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:600;background:var(--success-light);color:var(--success)}
+
+/* ── Cards ── */
+.card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);padding:20px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.card-title{font-weight:600;font-size:14px;color:var(--text)}
+.card-subtitle{font-size:12px;color:var(--text3);margin-top:1px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.stat-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:16px 20px}
+.stat-card .stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:10px}
+.stat-card .stat-value{font-size:26px;font-weight:700;color:var(--text);line-height:1}
+.stat-card .stat-label{font-size:12px;color:var(--text3);margin-top:4px}
+.stat-card .stat-change{font-size:12px;font-weight:600;margin-top:6px}
+.positive{color:var(--success)}.negative{color:var(--danger)}
+
+/* ── Status badges ── */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:99px;font-size:11px;font-weight:600}
+.badge-success{background:var(--success-light);color:var(--success)}
+.badge-warning{background:var(--warning-light);color:var(--warning)}
+.badge-danger{background:var(--danger-light);color:var(--danger)}
+.badge-info{background:var(--primary-light);color:var(--primary)}
+.badge-gray{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+
+/* ── Buttons ── */
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;border:none}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-dark)}
+.btn-outline{background:transparent;color:var(--primary);border:1.5px solid var(--primary)}.btn-outline:hover{background:var(--primary-light)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border)}.btn-ghost:hover{background:var(--surface2)}
+.btn-danger{background:var(--danger);color:#fff}.btn-danger:hover{opacity:.88}
+.btn-sm{padding:5px 11px;font-size:12px}
+
+/* ── Chat ── */
+.chat-wrap{display:flex;flex-direction:column;height:100%;background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
+.chat-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,var(--primary-dark) 0%,var(--primary) 100%)}
+.chat-header-info{flex:1}
+.chat-header-name{color:#fff;font-weight:600;font-size:15px}
+.chat-header-status{color:rgba(255,255,255,.65);font-size:12px;display:flex;align-items:center;gap:5px}
+.status-dot{width:7px;height:7px;background:#4ade80;border-radius:50%}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--bg)}
+.msg{max-width:80%;display:flex;flex-direction:column;gap:4px}
+.msg.bot{align-self:flex-start}
+.msg.user{align-self:flex-end}
+.msg-bubble{padding:11px 15px;border-radius:16px;font-size:13.5px;line-height:1.5}
+.msg.bot .msg-bubble{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px;color:var(--text)}
+.msg.user .msg-bubble{background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+.msg-time{font-size:10px;color:var(--text3)}
+.msg.user .msg-time{text-align:right}
+.msg-avatar{width:28px;height:28px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.msg-row{display:flex;align-items:flex-end;gap:8px}
+.msg.user .msg-row{flex-direction:row-reverse}
+.chat-input-area{padding:12px 16px;border-top:1px solid var(--border);background:var(--surface);display:flex;gap:10px;align-items:flex-end}
+.chat-input{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:9px 13px;font-size:13.5px;resize:none;outline:none;transition:.15s;max-height:90px;line-height:1.4}
+.chat-input:focus{border-color:var(--primary)}
+.chat-send-btn{width:38px;height:38px;border-radius:10px;background:var(--primary);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:.15s}
+.chat-send-btn:hover{background:var(--primary-dark)}
+.emergency-banner{background:var(--danger);color:#fff;padding:10px 16px;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px;animation:pulse .8s ease-in-out infinite alternate}
+@keyframes pulse{from{opacity:1}to{opacity:.85}}
+.quick-actions{display:flex;flex-wrap:wrap;gap:6px;padding:8px 16px 0}
+.quick-chip{background:var(--primary-light);color:var(--primary);border:1px solid var(--primary);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500;cursor:pointer;transition:.15s}
+.quick-chip:hover{background:var(--primary);color:#fff}
+.typing-dot{width:6px;height:6px;background:var(--text3);border-radius:50%;animation:bounce 1.2s infinite}
+.typing-dot:nth-child(2){animation-delay:.2s}.typing-dot:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+.disclaimer-box{background:var(--warning-light);border:1px solid var(--warning);border-radius:10px;padding:12px 16px;font-size:12.5px;color:var(--text2);margin-bottom:8px;line-height:1.5}
+
+/* ── Tables ── */
+.data-table{width:100%;border-collapse:collapse;font-size:13px}
+.data-table th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--text3);border-bottom:1.5px solid var(--border);background:var(--surface2)}
+.data-table td{padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:middle;color:var(--text2)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--primary-light)}
+.data-table .patient-info{display:flex;align-items:center;gap:9px}
+
+/* ── Appointments ── */
+.appt-card{background:var(--surface);border-radius:10px;border:1px solid var(--border);padding:14px 16px;display:flex;align-items:center;gap:14px;transition:.15s}
+.appt-card:hover{box-shadow:var(--shadow);border-color:var(--border2)}
+.appt-time{background:var(--primary-light);color:var(--primary);border-radius:8px;padding:8px 12px;text-align:center;flex-shrink:0;min-width:58px}
+.appt-time .time{font-size:15px;font-weight:700}
+.appt-time .ampm{font-size:10px;font-weight:600;text-transform:uppercase}
+.appt-info{flex:1}
+.appt-doctor{font-weight:600;font-size:14px}
+.appt-type{font-size:12px;color:var(--text3);margin-top:1px}
+.appt-actions{display:flex;gap:6px}
+
+/* ── Doctor card ── */
+.doctor-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:18px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;cursor:pointer;transition:.15s}
+.doctor-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px)}
+.doctor-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;font-weight:600}
+.doctor-name{font-weight:600;font-size:14px}
+.doctor-spec{font-size:12px;color:var(--text3)}
+.doctor-rating{font-size:12px;color:var(--warning);font-weight:600}
+.doctor-fee{font-size:13px;font-weight:700;color:var(--primary)}
+
+/* ── Medical records ── */
+.record-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.record-item:last-child{border-bottom:none}
+.record-icon{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.record-info{flex:1}
+.record-name{font-size:13.5px;font-weight:600}
+.record-date{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* ── Charts (simple) ── */
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:90px;padding-top:10px}
+.bar{flex:1;background:var(--primary-light);border-radius:4px 4px 0 0;position:relative;min-height:4px;transition:.3s}
+.bar.active{background:var(--primary)}
+.bar-label{position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--text3);white-space:nowrap}
+.bar-val{position:absolute;top:-18px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--text);font-weight:600;white-space:nowrap}
+
+/* ── Risk indicator ── */
+.risk-meter{display:flex;gap:6px;align-items:center}
+.risk-block{flex:1;height:8px;border-radius:4px}
+.risk-low{background:#86efac}.risk-mid{background:#fcd34d}.risk-high{background:#fca5a5}
+.risk-active-low{background:var(--success)}.risk-active-mid{background:var(--warning)}.risk-active-high{background:var(--danger)}
+
+/* ── Notification dot ── */
+.notif-dot{position:absolute;top:8px;right:8px;width:8px;height:8px;background:var(--danger);border-radius:50%}
+
+/* ── Tabs ── */
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:20px}
+.tab{padding:9px 18px;font-size:13.5px;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary);font-weight:600}
+.tab:hover:not(.active){color:var(--text)}
+
+/* ── Auth page ── */
+.auth-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#0f4c8a 0%,#1a6db5 40%,#00b4d8 100%)}
+.auth-card{background:#fff;border-radius:20px;padding:36px 40px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.auth-logo{display:flex;align-items:center;gap:10px;margin-bottom:24px;justify-content:center}
+.auth-title{font-size:24px;font-weight:700;color:var(--text);text-align:center;margin-bottom:4px}
+.auth-sub{font-size:13px;color:var(--text3);text-align:center;margin-bottom:24px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:12.5px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block}
+.form-input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:10px 14px;font-size:14px;outline:none;transition:.15s;color:var(--text)}
+.form-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(26,109,181,.1)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lang-switch{display:flex;align-items:center;gap:8px;margin-bottom:16px;justify-content:center}
+.lang-btn{padding:4px 12px;border-radius:99px;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:transparent;color:var(--text3);transition:.15s}
+.lang-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ── Landing page ── */
+.landing{min-height:100vh;background:#fff;overflow-y:auto}
+.landing-nav{display:flex;align-items:center;padding:16px 32px;background:#fff;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.landing-nav .nav-links{display:flex;gap:24px;margin-left:auto;align-items:center}
+.landing-nav .nav-links a{font-size:14px;color:var(--text2);cursor:pointer;font-weight:500;text-decoration:none}
+.hero{padding:64px 32px;text-align:center;background:linear-gradient(135deg,#f0f8ff 0%,#e8f4fd 100%)}
+.hero-badge{display:inline-flex;align-items:center;gap:6px;background:var(--primary-light);color:var(--primary);border-radius:99px;padding:6px 14px;font-size:12px;font-weight:600;margin-bottom:20px}
+.hero h1{font-size:40px;font-weight:700;color:var(--text);line-height:1.2;margin-bottom:16px;max-width:600px;margin-left:auto;margin-right:auto}
+.hero h1 span{color:var(--primary)}
+.hero p{font-size:16px;color:var(--text2);max-width:500px;margin:0 auto 28px;line-height:1.6}
+.hero-buttons{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.feature-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:48px 32px;max-width:960px;margin:0 auto}
+.feature-card{padding:24px;border-radius:14px;border:1px solid var(--border);transition:.2s}
+.feature-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);border-color:var(--primary)}
+.feature-icon{font-size:28px;margin-bottom:12px}
+.feature-title{font-weight:700;font-size:15px;margin-bottom:6px}
+.feature-desc{font-size:13px;color:var(--text2);line-height:1.5}
+.testimonial-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:0 32px 48px;max-width:960px;margin:0 auto}
+.testimonial{background:var(--surface2);border-radius:12px;padding:20px;border:1px solid var(--border)}
+.test-text{font-size:13.5px;color:var(--text2);line-height:1.6;margin-bottom:12px;font-style:italic}
+.test-author{font-weight:600;font-size:13px}.test-role{font-size:11px;color:var(--text3)}
+.section-header{text-align:center;padding:40px 32px 20px}
+.section-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--primary);margin-bottom:8px}
+.section-title{font-size:26px;font-weight:700;color:var(--text)}
+.cta-section{background:linear-gradient(135deg,var(--primary-dark),var(--primary));padding:48px 32px;text-align:center}
+.cta-section h2{color:#fff;font-size:28px;font-weight:700;margin-bottom:12px}
+.cta-section p{color:rgba(255,255,255,.8);font-size:14px;margin-bottom:24px}
+.landing-footer{padding:24px 32px;background:var(--text);color:rgba(255,255,255,.5);font-size:12px;display:flex;justify-content:space-between}
+
+/* ── Video room ── */
+.video-room{background:#0a0a12;border-radius:var(--radius);overflow:hidden;position:relative;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center}
+.video-main{width:100%;height:100%;object-fit:cover;background:linear-gradient(135deg,#1a1a2e,#16213e)}
+.video-main-placeholder{display:flex;flex-direction:column;align-items:center;gap:12px;color:rgba(255,255,255,.6)}
+.video-self{position:absolute;bottom:16px;right:16px;width:110px;height:72px;background:linear-gradient(135deg,#0f3460,#533483);border-radius:10px;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.7);font-size:11px}
+.video-controls{display:flex;gap:10px;justify-content:center;padding:12px}
+.video-btn{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15);color:#fff;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+.video-btn:hover{background:rgba(255,255,255,.2)}
+.video-btn.danger{background:var(--danger)}
+
+/* ── Progress bar ── */
+.progress-bar{width:100%;height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;background:var(--primary);border-radius:3px;transition:.3s}
+
+/* ── Scroll ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ── Transitions ── */
+.page{animation:fadeIn .2s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Admin analytics ── */
+.analytics-ring{position:relative;display:inline-flex}
+.ring-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-val{font-size:20px;font-weight:700;color:var(--text)}
+.ring-sub{font-size:10px;color:var(--text3)}
+
+/* ── Rx card ── */
+.rx-card{background:linear-gradient(135deg,#f0f8ff,#e8f4fd);border:1.5px solid var(--primary);border-radius:12px;padding:18px;position:relative}
+.rx-watermark{position:absolute;top:12px;right:14px;font-size:28px;font-weight:900;color:var(--primary);opacity:.08;font-style:italic}
+.rx-drug{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed var(--border2)}
+.rx-drug:last-child{border-bottom:none}
+.drug-name{font-weight:600;font-size:14px}
+.drug-dose{font-size:12px;color:var(--text3);margin-top:2px}
+
+/* ── Schedule grid ── */
+.schedule-grid{display:grid;grid-template-columns:auto repeat(5,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;font-size:12px}
+.schedule-grid > div{background:var(--surface);padding:7px 10px}
+.schedule-header{background:var(--surface2) !important;font-weight:700;color:var(--text3);font-size:11px;text-align:center}
+.schedule-time{color:var(--text3);font-size:11px;white-space:nowrap}
+.schedule-slot{cursor:pointer;transition:.15s}
+.schedule-slot:hover{background:var(--primary-light) !important}
+.schedule-slot.booked{background:var(--primary-light) !important}
+.slot-appt{background:var(--primary);color:#fff;border-radius:4px;padding:3px 6px;font-size:11px;line-height:1.3}
+.slot-avail{background:var(--success-light);color:var(--success);border-radius:4px;padding:3px 6px;font-size:11px;text-align:center}
+
+/* ── Symptom tags ── */
+.symptom-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.symptom-tag{background:var(--danger-light);color:var(--danger);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:500}
+.symptom-tag-green{background:var(--success-light);color:var(--success)}
+.symptom-tag-yellow{background:var(--warning-light);color:var(--warning)}
+
+/* ── Misc ── */
+.divider{height:1px;background:var(--border);margin:16px 0}
+.text-sm{font-size:13px}.text-xs{font-size:11px}
+.text-muted{color:var(--text3)}.text-primary{color:var(--primary)}
+.fw-600{font-weight:600}.fw-700{font-weight:700}
+.mt-4{margin-top:4px}.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mt-16{margin-top:16px}.mt-20{margin-top:20px}
+.mb-4{margin-bottom:4px}.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}
+.flex{display:flex}.items-center{align-items:center}.gap-8{gap:8px}.gap-12{gap:12px}.gap-16{gap:16px}
+.flex-1{flex:1}.justify-between{justify-content:space-between}.justify-center{justify-content:center}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+// ── State ──
+const state = {
+  view: 'landing',
+  role: 'patient',
+  lang: 'en',
+  activePage: 'dashboard',
+  chatMessages: [],
+  chatStep: 0,
+  chatData: {},
+  chatTyping: false,
+  emergency: false,
+  activeTab: 0,
+};
+
+const T = {
+  en: {
+    greeting: "Hello! I'm MediAssist AI 🏥\n\nI'm here to help assess your symptoms and guide you to the right care. Remember, I'm not a doctor — for emergencies, call 108 immediately.\n\nWhat's your name?",
+    askAge: (name) => `Nice to meet you, ${name}! How old are you?`,
+    askGender: "What is your gender?\n(Male / Female / Other)",
+    askSymptoms: "Please describe your main symptoms:",
+    askDuration: "How long have you had these symptoms?",
+    askSeverity: "On a scale of 1–10, how severe are your symptoms?",
+    askMeds: "Are you currently taking any medications? If yes, please list them.",
+    askAllergies: "Do you have any known allergies?",
+    processing: "Analyzing your symptoms...",
+    emergencyMsg: "🚨 EMERGENCY DETECTED — Please call 108 or visit the nearest ER immediately!",
+  },
+  ta: {
+    greeting: "வணக்கம்! நான் MediAssist AI 🏥\n\nஉங்கள் அறிகுறிகளை மதிப்பிட உதவுகிறேன். நான் மருத்துவர் இல்லை — அவசரநிலைகளில் 108 அழைக்கவும்.\n\nஉங்கள் பெயர் என்ன?",
+    askAge: (name) => `${name}, உங்கள் வயது என்ன?`,
+    askGender: "பாலினம் என்ன?\n(ஆண் / பெண் / மற்றவை)",
+    askSymptoms: "உங்கள் முக்கிய அறிகுறிகளை விவரிக்கவும்:",
+    askDuration: "இந்த அறிகுறிகள் எவ்வளவு நேரத்திற்கு முன்பு தொடங்கின?",
+    askSeverity: "1–10 அளவில் தீவிரம் எவ்வளவு?",
+    askMeds: "தற்போது மருந்துகள் எடுக்கிறீர்களா?",
+    askAllergies: "ஏதேனும் ஒவ்வாமை உள்ளதா?",
+    processing: "அறிகுறிகளை பகுப்பாய்வு செய்கிறேன்...",
+    emergencyMsg: "🚨 அவசரநிலை — உடனடியாக 108 அழைக்கவும்!",
+  }
+};
+
+const EMERGENCY_KEYWORDS = ['chest pain','heart attack','stroke','suicidal','cannot breathe',"can't breathe",'unconscious','choking','severe bleeding','poisoning'];
+const DOCTORS = [
+  {name:'Dr. Priya Sharma',spec:'General Physician',rating:'4.9',exp:'12 yrs',fee:'₹499',avatar:'PS',avail:'Today'},
+  {name:'Dr. Arun Kumar',spec:'Cardiologist',rating:'4.8',exp:'18 yrs',fee:'₹799',avatar:'AK',avail:'Tomorrow'},
+  {name:'Dr. Meena Devi',spec:'Dermatologist',rating:'4.7',exp:'9 yrs',fee:'₹599',avatar:'MD',avail:'Today'},
+  {name:'Dr. Rajesh G.',spec:'Neurologist',rating:'4.9',exp:'22 yrs',fee:'₹899',avatar:'RG',avail:'In 2 days'},
+  {name:'Dr. Kavya Nair',spec:'Pediatrician',rating:'4.8',exp:'7 yrs',fee:'₹449',avatar:'KN',avail:'Today'},
+  {name:'Dr. Siva Kumar',spec:'Orthopedist',rating:'4.6',exp:'14 yrs',fee:'₹699',avatar:'SK',avail:'Tomorrow'},
+];
+const APPOINTMENTS = [
+  {time:'10:30',ampm:'AM',doctor:'Dr. Priya Sharma',type:'General Checkup',status:'confirmed',date:'Today'},
+  {time:'2:00',ampm:'PM',doctor:'Dr. Arun Kumar',type:'Cardiology Follow-up',status:'pending',date:'Tomorrow'},
+  {time:'11:00',ampm:'AM',doctor:'Dr. Kavya Nair',type:'Routine Screening',status:'confirmed',date:'Jun 3'},
+];
+const PATIENTS = [
+  {name:'Ravi Krishnan',age:42,symptom:'Chest pain',risk:'high',time:'9:15 AM',status:'waiting'},
+  {name:'Anitha S.',age:28,symptom:'Fever, headache',risk:'low',time:'9:40 AM',status:'in-progress'},
+  {name:'Murugan P.',age:65,symptom:'Joint pain',risk:'moderate',time:'10:10 AM',status:'waiting'},
+  {name:'Deepa L.',age:35,symptom:'Skin rash',risk:'low',time:'10:30 AM',status:'waiting'},
+  {name:'Senthil K.',age:55,symptom:'Diabetes follow-up',risk:'low',time:'11:00 AM',status:'scheduled'},
+];
+const PRESCRIPTIONS = [
+  {drug:'Paracetamol 500mg',dose:'1 tablet × 3 daily, 5 days',icon:'💊'},
+  {drug:'Cetirizine 10mg',dose:'1 tablet × 1 night, 7 days',icon:'💊'},
+  {drug:'Pantoprazole 40mg',dose:'1 tablet before breakfast, 14 days',icon:'💊'},
+];
+const RECORDS = [
+  {name:'Blood Test Report',date:'May 12, 2025',icon:'🔬',color:'#dbeafe'},
+  {name:'Chest X-Ray',date:'March 3, 2025',icon:'🩻',color:'#f0fdf4'},
+  {name:'ECG Report',date:'Jan 22, 2025',icon:'📈',color:'#fef3c7'},
+  {name:'Prescription — Dr. Sharma',date:'May 18, 2025',icon:'📋',color:'#fce7f3'},
+];
+const ANALYTICS = {
+  users:[{mon:'Mon',v:32},{mon:'Tue',v:45},{mon:'Wed',v:38},{mon:'Thu',v:62},{mon:'Fri',v:71},{mon:'Sat',v:48},{mon:'Sun',v:29}],
+};
+
+// ── Render helpers ──
+function $(id){return document.getElementById(id)}
+function render(html){$('root').innerHTML=html;bindEvents()}
+
+function riskBadge(r){
+  if(r==='high') return '<span class="badge badge-danger">🔴 High</span>';
+  if(r==='moderate') return '<span class="badge badge-warning">🟡 Moderate</span>';
+  return '<span class="badge badge-success">🟢 Low</span>';
+}
+function statusBadge(s){
+  const m={confirmed:'badge-success',pending:'badge-warning',cancelled:'badge-danger','in-progress':'badge-info',waiting:'badge-warning',scheduled:'badge-gray'};
+  return `<span class="badge ${m[s]||'badge-gray'}">${s.charAt(0).toUpperCase()+s.slice(1)}</span>`;
+}
+
+// ── Pages ──
+function renderLanding(){
+  return `<div class="landing">
+    <nav class="landing-nav">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="logo-icon" style="font-size:20px">🏥</div>
+        <div><div style="font-weight:700;font-size:16px;color:var(--primary)">MediAssist AI</div>
+        <div style="font-size:10px;color:var(--text3)">Smart Healthcare Platform</div></div>
+      </div>
+      <div class="nav-links">
+        <a onclick="go('landing')">Home</a>
+        <a onclick="">Features</a>
+        <a onclick="">Doctors</a>
+        <div class="lang-switch" style="margin:0">
+          <button class="lang-btn ${state.lang==='en'?'active':''}" onclick="setLang('en')">EN</button>
+          <button class="lang-btn ${state.lang==='ta'?'active':''}" onclick="setLang('ta')">தமிழ்</button>
+        </div>
+        <button class="btn btn-outline btn-sm" onclick="go('auth')">Sign In</button>
+        <button class="btn btn-primary btn-sm" onclick="go('auth')">Get Started →</button>
+      </div>
+    </nav>
+    <div class="hero">
+      <div class="hero-badge">🤖 AI-Powered Healthcare</div>
+      <h1>${state.lang==='ta'?'உங்கள் <span style="color:var(--primary)">AI மருத்துவ</span> உதவியாளர்':'Your <span>AI Medical</span> Assistant — Available 24/7'}</h1>
+      <p>${state.lang==='ta'?'அறிகுறி மதிப்பீடு, நியமன பதிவு மற்றும் மருத்துவர் ஆலோசனை — அனைத்தும் ஒரே இடத்தில்.':'Symptom triage, appointment booking & doctor consultations — all in one secure platform.'}</p>
+      <div class="hero-buttons">
+        <button class="btn btn-primary" onclick="go('auth')" style="padding:11px 24px;font-size:15px">🏥 Start Consultation</button>
+        <button class="btn btn-outline" onclick="go('auth')" style="padding:11px 24px;font-size:15px">👨‍⚕️ I'm a Doctor</button>
+      </div>
+      <div style="display:flex;justify-content:center;gap:32px;margin-top:32px;flex-wrap:wrap">
+        ${[['50K+','Patients Served'],['200+','Expert Doctors'],['4.9★','Patient Rating'],['24/7','AI Support']].map(([v,l])=>`<div style="text-align:center"><div style="font-size:22px;font-weight:700;color:var(--primary)">${v}</div><div style="font-size:12px;color:var(--text3)">${l}</div></div>`).join('')}
+      </div>
+    </div>
+    <div class="section-header">
+      <div class="section-label">Why MediAssist?</div>
+      <div class="section-title">Everything you need for modern healthcare</div>
+    </div>
+    <div class="feature-grid">
+      ${[
+        ['🤖','AI Symptom Triage','Intelligent symptom analysis with emergency detection and risk stratification'],
+        ['📅','Smart Scheduling','Book appointments with top doctors instantly, with real-time availability'],
+        ['🎥','Video Consultations','Secure HD video calls with your doctor from anywhere in the world'],
+        ['📋','Digital Prescriptions','Receive, manage and export your prescriptions as PDF documents'],
+        ['🔒','Secure & Private','HIPAA-compliant platform with encrypted medical records'],
+        ['🌐','Multilingual','Full support for English and Tamil (தமிழ்) languages'],
+      ].map(([icon,title,desc])=>`<div class="feature-card"><div class="feature-icon">${icon}</div><div class="feature-title">${title}</div><div class="feature-desc">${desc}</div></div>`).join('')}
+    </div>
+    <div class="section-header">
+      <div class="section-label">What patients say</div>
+      <div class="section-title">Trusted by thousands across Tamil Nadu</div>
+    </div>
+    <div class="testimonial-grid">
+      <div class="testimonial"><div class="test-text">"The AI chatbot identified my symptoms accurately and connected me with the right specialist. Exceptional service!"</div><div class="test-author">Kavitha R.</div><div class="test-role">Patient, Coimbatore</div></div>
+      <div class="testimonial"><div class="test-text">"As a doctor, MediAssist has streamlined my practice tremendously. Patient intake is now fully automated."</div><div class="test-author">Dr. Senthil Kumar</div><div class="test-role">Cardiologist, Chennai</div></div>
+      <div class="testimonial"><div class="test-text">"The Tamil language support made it so easy for my parents to use. Outstanding healthcare technology!"</div><div class="test-author">Arjun M.</div><div class="test-role">Patient, Erode</div></div>
+    </div>
+    <div class="cta-section">
+      <h2>Ready to transform your healthcare experience?</h2>
+      <p>Join 50,000+ patients who trust MediAssist AI for their health needs</p>
+      <button class="btn" style="background:#fff;color:var(--primary);font-size:15px;padding:12px 28px" onclick="go('auth')">Get Started Free →</button>
+    </div>
+    <div class="landing-footer">
+      <div>© 2025 MediAssist AI. All rights reserved. | Not a substitute for professional medical advice.</div>
+      <div style="display:flex;gap:16px"><span>Privacy</span><span>Terms</span><span>Contact</span></div>
+    </div>
+  </div>`;
+}
+
+function renderAuth(){
+  return `<div class="auth-wrap">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <div class="logo-icon" style="font-size:22px;width:40px;height:40px">🏥</div>
+        <div><div style="font-weight:700;font-size:18px;color:var(--primary)">MediAssist AI</div></div>
+      </div>
+      <div class="lang-switch">
+        <button class="lang-btn ${state.lang==='en'?'active':''}" onclick="setLang('en')">English</button>
+        <button class="lang-btn ${state.lang==='ta'?'active':''}" onclick="setLang('ta')">தமிழ்</button>
+      </div>
+      <div class="tabs" style="margin-bottom:20px">
+        <div class="tab ${state.authTab!=='register'?'active':''}" onclick="state.authTab='login';rerender()">Sign In</div>
+        <div class="tab ${state.authTab==='register'?'active':''}" onclick="state.authTab='register';rerender()">Register</div>
+      </div>
+      ${state.authTab==='register'?`
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-input" placeholder="Ravi"/></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" placeholder="Kumar"/></div>
+      </div>
+      `:''}
+      <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" placeholder="you@example.com" value="patient@mediassist.ai"/></div>
+      <div class="form-group"><label class="form-label">Password</label><input class="form-input" type="password" placeholder="••••••••" value="demo123"/></div>
+      ${state.authTab==='register'?`<div class="form-group"><label class="form-label">Role</label>
+        <select class="form-input"><option>Patient</option><option>Doctor</option></select></div>`:''}
+      <div style="margin-bottom:16px">
+        <div style="font-size:12px;color:var(--text3);margin-bottom:8px;text-align:center">Sign in as:</div>
+        <div class="role-switcher" style="display:flex;gap:8px;justify-content:center">
+          ${['patient','doctor','admin'].map(r=>`<button class="role-btn ${state.role===r?'active':''}" onclick="state.role='${r}';rerender()">${r.charAt(0).toUpperCase()+r.slice(1)}</button>`).join('')}
+        </div>
+      </div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;padding:11px" onclick="go('app')">
+        ${state.authTab==='register'?'Create Account':'Sign In'} →
+      </button>
+      <div style="text-align:center;margin-top:14px;font-size:12px;color:var(--text3)">
+        ${state.authTab==='register'?'Already have an account? <a onclick="state.authTab=\'login\';rerender()" style="color:var(--primary);cursor:pointer">Sign in</a>':'Forgot password? <a style="color:var(--primary);cursor:pointer">Reset</a>'}
+      </div>
+      <div style="background:var(--primary-light);border-radius:8px;padding:10px;margin-top:16px;font-size:11.5px;color:var(--text3);text-align:center">
+        🔒 Secured with AES-256 encryption. HIPAA compliant.
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderApp(){
+  const nav = getNav();
+  return `<div class="app-shell">
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon" style="font-size:18px">🏥</div>
+        <div class="logo-text">MediAssist<div class="logo-sub">AI Platform</div></div>
+      </div>
+      <div class="role-switcher">
+        ${['patient','doctor','admin'].map(r=>`<button class="role-btn ${state.role===r?'active':''}" onclick="switchRole('${r}')">${r==='patient'?'Pt':r==='doctor'?'Dr':'Ad'}</button>`).join('')}
+      </div>
+      ${nav.map(({label,items})=>`
+        <div class="nav-section">
+          <div class="nav-label">${label}</div>
+          ${items.map(({icon,name,page,badge})=>`
+            <div class="nav-item ${state.activePage===page?'active':''}" onclick="setPage('${page}')">
+              <span class="nav-icon">${icon}</span>${name}${badge?`<span class="badge" style="background:var(--danger);color:#fff;font-size:10px">${badge}</span>`:''}
+            </div>`).join('')}
+        </div>`).join('')}
+      <div class="sidebar-footer">
+        <div class="sidebar-user" onclick="setPage('profile')">
+          <div class="avatar">${state.role==='patient'?'PK':state.role==='doctor'?'DR':'AD'}</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name">${state.role==='patient'?'Priya Kumar':state.role==='doctor'?'Dr. Arun K.':'Admin'}</div>
+            <div class="sidebar-user-role">${state.role}</div>
+          </div>
+          <span style="color:rgba(255,255,255,.3);font-size:12px">⚙</span>
+        </div>
+      </div>
+    </div>
+    <div class="main">
+      <div class="topbar">
+        <div class="topbar-title">${getPageTitle()}</div>
+        <div class="topbar-actions">
+          <div class="lang-switch" style="margin:0">
+            <button class="lang-btn ${state.lang==='en'?'active':''}" onclick="setLang('en')">EN</button>
+            <button class="lang-btn ${state.lang==='ta'?'active':''}" onclick="setLang('ta')">தமிழ்</button>
+          </div>
+          <div class="icon-btn" style="position:relative" onclick="alert('3 new notifications')">🔔<span class="notif-dot"></span></div>
+          <div class="icon-btn" onclick="alert('Search coming soon')">🔍</div>
+          <div class="avatar" style="cursor:pointer">${state.role==='patient'?'PK':state.role==='doctor'?'DR':'AD'}</div>
+        </div>
+      </div>
+      <div class="content">${renderPage()}</div>
+    </div>
+  </div>`;
+}
+
+function getNav(){
+  if(state.role==='patient') return [
+    {label:'Main',items:[
+      {icon:'📊',name:'Dashboard',page:'dashboard'},
+      {icon:'🤖',name:'AI Chat',page:'chat',badge:'New'},
+      {icon:'📅',name:'Appointments',page:'appointments'},
+    ]},
+    {label:'Health',items:[
+      {icon:'📋',name:'Prescriptions',page:'prescriptions'},
+      {icon:'🗂',name:'Medical Records',page:'records'},
+      {icon:'👨‍⚕️',name:'Find Doctors',page:'doctors'},
+    ]},
+    {label:'Account',items:[
+      {icon:'👤',name:'Profile',page:'profile'},
+    ]}
+  ];
+  if(state.role==='doctor') return [
+    {label:'Practice',items:[
+      {icon:'📊',name:'Dashboard',page:'dashboard'},
+      {icon:'👥',name:'Patient Queue',page:'queue',badge:'3'},
+      {icon:'📅',name:'Schedule',page:'schedule'},
+    ]},
+    {label:'Consultation',items:[
+      {icon:'🎥',name:'Video Room',page:'video'},
+      {icon:'💊',name:'Prescriptions',page:'prescriptions'},
+      {icon:'📋',name:'Patient Records',page:'records'},
+    ]},
+    {label:'Account',items:[
+      {icon:'👤',name:'Profile',page:'profile'},
+    ]}
+  ];
+  return [
+    {label:'Admin',items:[
+      {icon:'📊',name:'Analytics',page:'dashboard'},
+      {icon:'👥',name:'Users',page:'queue'},
+      {icon:'✅',name:'Verifications',page:'appointments',badge:'5'},
+      {icon:'🔍',name:'System',page:'records'},
+    ]},
+    {label:'Settings',items:[
+      {icon:'⚙',name:'Configuration',page:'profile'},
+    ]}
+  ];
+}
+
+function getPageTitle(){
+  const titles={dashboard:'Dashboard',chat:'AI Medical Chat',appointments:'Appointments',prescriptions:'Prescriptions',records:'Medical Records',doctors:'Find Doctors',profile:'My Profile',queue:state.role==='doctor'?'Patient Queue':'User Management',schedule:'Weekly Schedule',video:'Video Consultation',};
+  return titles[state.activePage]||'MediAssist AI';
+}
+
+function renderPage(){
+  if(state.activePage==='dashboard'){
+    if(state.role==='patient') return renderPatientDash();
+    if(state.role==='doctor') return renderDoctorDash();
+    return renderAdminDash();
+  }
+  if(state.activePage==='chat') return renderChat();
+  if(state.activePage==='appointments') return renderAppointments();
+  if(state.activePage==='prescriptions') return renderPrescriptions();
+  if(state.activePage==='records') return renderRecords();
+  if(state.activePage==='doctors') return renderDoctors();
+  if(state.activePage==='profile') return renderProfile();
+  if(state.activePage==='queue') return renderQueue();
+  if(state.activePage==='schedule') return renderSchedule();
+  if(state.activePage==='video') return renderVideo();
+  return '<div class="card"><p>Page coming soon</p></div>';
+}
+
+function renderPatientDash(){
+  return `<div class="page">
+    <div class="grid-4" style="margin-bottom:20px">
+      ${[
+        {icon:'📅',label:'Appointments',value:'3',change:'+1 this week',pos:true,color:'#dbeafe'},
+        {icon:'💊',label:'Prescriptions',value:'2',change:'Active',pos:true,color:'#dcfce7'},
+        {icon:'🤖',label:'AI Consultations',value:'7',change:'This month',pos:true,color:'#fce7f3'},
+        {icon:'⚠',label:'Health Score',value:'82%',change:'Good',pos:true,color:'#fef3c7'},
+      ].map(s=>`<div class="stat-card">
+        <div class="stat-icon" style="background:${s.color}">${s.icon}</div>
+        <div class="stat-value">${s.value}</div>
+        <div class="stat-label">${s.label}</div>
+        <div class="stat-change ${s.pos?'positive':'negative'}">${s.pos?'↑':''} ${s.change}</div>
+      </div>`).join('')}
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div><div class="card-title">Today's Appointments</div><div class="card-subtitle">May 25, 2025</div></div>
+          <button class="btn btn-primary btn-sm" onclick="setPage('appointments')">+ Book</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          ${APPOINTMENTS.slice(0,2).map(a=>`<div class="appt-card">
+            <div class="appt-time"><div class="time">${a.time}</div><div class="ampm">${a.ampm}</div></div>
+            <div class="appt-info">
+              <div class="appt-doctor">${a.doctor}</div>
+              <div class="appt-type">${a.type}</div>
+            </div>
+            ${statusBadge(a.status)}
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Start AI Consultation</div>
+          <span class="badge badge-success">🟢 Online</span>
+        </div>
+        <div style="background:linear-gradient(135deg,var(--primary-dark),var(--primary));border-radius:12px;padding:20px;text-align:center">
+          <div style="font-size:40px;margin-bottom:10px">🤖</div>
+          <div style="color:#fff;font-weight:700;font-size:16px;margin-bottom:6px">AI Symptom Analysis</div>
+          <div style="color:rgba(255,255,255,.75);font-size:12.5px;margin-bottom:16px">Get instant guidance on your symptoms 24/7</div>
+          <button class="btn" style="background:#fff;color:var(--primary);width:100%;justify-content:center" onclick="setPage('chat')">Start Consultation →</button>
+        </div>
+        <div style="margin-top:12px;font-size:11.5px;color:var(--text3);text-align:center">⚠ AI is not a substitute for professional medical advice</div>
+      </div>
+    </div>
+    <div class="grid-2" style="margin-top:16px">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Recent Prescriptions</div><button class="btn btn-ghost btn-sm" onclick="setPage('prescriptions')">View All</button></div>
+        ${PRESCRIPTIONS.slice(0,2).map(p=>`<div class="rx-drug"><span style="font-size:20px">${p.icon}</span><div><div class="drug-name">${p.drug}</div><div class="drug-dose">${p.dose}</div></div></div>`).join('')}
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Health Records</div><button class="btn btn-ghost btn-sm" onclick="setPage('records')">View All</button></div>
+        ${RECORDS.slice(0,3).map(r=>`<div class="record-item">
+          <div class="record-icon" style="background:${r.color}">${r.icon}</div>
+          <div class="record-info"><div class="record-name">${r.name}</div><div class="record-date">${r.date}</div></div>
+          <button class="btn btn-ghost btn-sm">↓</button>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderDoctorDash(){
+  return `<div class="page">
+    <div class="grid-4" style="margin-bottom:20px">
+      ${[
+        {icon:'👥',label:"Today's Patients",value:'12',change:'3 waiting',pos:true,color:'#dbeafe'},
+        {icon:'✅',label:'Completed',value:'7',change:'58% done',pos:true,color:'#dcfce7'},
+        {icon:'💰',label:'Revenue Today',value:'₹8.4K',change:'+12% vs avg',pos:true,color:'#fce7f3'},
+        {icon:'⭐',label:'Rating',value:'4.9',change:'98 reviews',pos:true,color:'#fef3c7'},
+      ].map(s=>`<div class="stat-card">
+        <div class="stat-icon" style="background:${s.color}">${s.icon}</div>
+        <div class="stat-value">${s.value}</div>
+        <div class="stat-label">${s.label}</div>
+        <div class="stat-change ${s.pos?'positive':'negative'}">${s.pos?'↑':''} ${s.change}</div>
+      </div>`).join('')}
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div><div class="card-title">Patient Queue</div><div class="card-subtitle">Live updates</div></div><span class="badge badge-danger">3 waiting</span></div>
+        ${PATIENTS.slice(0,4).map(p=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div class="avatar" style="width:34px;height:34px;font-size:13px;background:var(--primary-light);color:var(--primary)">${p.name.split(' ').map(n=>n[0]).join('')}</div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13.5px">${p.name}</div>
+            <div style="font-size:11.5px;color:var(--text3)">${p.symptom} • ${p.time}</div>
+          </div>
+          ${riskBadge(p.risk)}
+          <button class="btn btn-primary btn-sm" onclick="setPage('video')">📹</button>
+        </div>`).join('')}
+      </div>
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-title" style="margin-bottom:12px">Weekly Patients</div>
+          <div class="bar-chart">
+            ${ANALYTICS.users.map((d,i)=>`<div style="position:relative;flex:1;display:flex;flex-direction:column;align-items:center">
+              <div style="width:100%;background:${i===4?'var(--primary)':'var(--primary-light)'};border-radius:4px 4px 0 0;height:${d.v}px;max-height:90px;position:relative">
+                <div class="bar-val">${d.v}</div>
+              </div>
+              <div style="font-size:10px;color:var(--text3);margin-top:4px">${d.mon}</div>
+            </div>`).join('')}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">Quick Actions</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn btn-primary" style="justify-content:center" onclick="setPage('video')">🎥 Start Video Call</button>
+            <button class="btn btn-outline" style="justify-content:center" onclick="setPage('prescriptions')">💊 Write Prescription</button>
+            <button class="btn btn-ghost" style="justify-content:center" onclick="setPage('schedule')">📅 Manage Schedule</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderAdminDash(){
+  return `<div class="page">
+    <div class="grid-4" style="margin-bottom:20px">
+      ${[
+        {icon:'👥',label:'Total Users',value:'52,341',change:'+234 this week',pos:true,color:'#dbeafe'},
+        {icon:'👨‍⚕️',label:'Active Doctors',value:'218',change:'5 pending verification',pos:false,color:'#dcfce7'},
+        {icon:'📅',label:'Appointments',value:'1,892',change:'This month',pos:true,color:'#fce7f3'},
+        {icon:'💰',label:'Revenue',value:'₹4.2L',change:'+18% MoM',pos:true,color:'#fef3c7'},
+      ].map(s=>`<div class="stat-card">
+        <div class="stat-icon" style="background:${s.color}">${s.icon}</div>
+        <div class="stat-value">${s.value}</div>
+        <div class="stat-label">${s.label}</div>
+        <div class="stat-change ${s.pos?'positive':'negative'}">${s.pos?'↑':'⚠'} ${s.change}</div>
+      </div>`).join('')}
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header"><div class="card-title">User Growth (Weekly)</div></div>
+        <div class="bar-chart" style="height:110px">
+          ${ANALYTICS.users.map((d,i)=>`<div style="position:relative;flex:1;display:flex;flex-direction:column;align-items:center">
+            <div style="width:100%;background:${i===6?'var(--accent)':'var(--primary-light)'};border-radius:4px 4px 0 0;height:${d.v*1.4}px;max-height:110px;position:relative">
+              <div class="bar-val">${d.v*10}</div>
+            </div>
+            <div style="font-size:10px;color:var(--text3);margin-top:4px">${d.mon}</div>
+          </div>`).join('')}
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Pending Doctor Verifications</div><span class="badge badge-danger">5</span></div>
+        ${['Dr. Karthik M.','Dr. Preethi S.','Dr. Balu R.'].map((d,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+          <div class="avatar" style="background:var(--warning-light);color:var(--warning)">${d.split(' ').map(n=>n[0]).join('').slice(0,2)}</div>
+          <div style="flex:1"><div style="font-weight:600;font-size:13px">${d}</div><div style="font-size:11px;color:var(--text3)">MBBS, General Medicine</div></div>
+          <button class="btn btn-sm" style="background:var(--success-light);color:var(--success);border:none">✓ Verify</button>
+          <button class="btn btn-ghost btn-sm">✗</button>
+        </div>`).join('')}
+      </div>
+    </div>
+    <div class="card" style="margin-top:16px">
+      <div class="card-header"><div class="card-title">Recent Users</div><input class="form-input" placeholder="Search users..." style="width:200px;padding:6px 12px;font-size:13px"/></div>
+      <table class="data-table">
+        <thead><tr><th>User</th><th>Role</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${[
+            {name:'Priya Kumar',email:'priya@mail.com',role:'Patient',joined:'May 20, 2025',status:'active'},
+            {name:'Dr. Arun K.',email:'arun@mail.com',role:'Doctor',joined:'May 18, 2025',status:'active'},
+            {name:'Ravi S.',email:'ravi@mail.com',role:'Patient',joined:'May 22, 2025',status:'active'},
+            {name:'Dr. Meena D.',email:'meena@mail.com',role:'Doctor',joined:'May 19, 2025',status:'pending'},
+          ].map(u=>`<tr>
+            <td><div class="patient-info"><div class="avatar" style="width:28px;height:28px;font-size:11px;background:var(--primary-light);color:var(--primary)">${u.name.split(' ').map(n=>n[0]).join('')}</div><div><div style="font-weight:600">${u.name}</div><div style="font-size:11px;color:var(--text3)">${u.email}</div></div></div></td>
+            <td><span class="badge ${u.role==='Doctor'?'badge-info':'badge-gray'}">${u.role}</span></td>
+            <td>${u.joined}</td>
+            <td>${statusBadge(u.status)}</td>
+            <td><button class="btn btn-ghost btn-sm">Edit</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderChat(){
+  const msgs = state.chatMessages;
+  const t = T[state.lang];
+  if(msgs.length===0){
+    setTimeout(()=>{
+      addBotMsg(t.greeting);
+      state.chatStep=1;
+      rerender();
+    },400);
+  }
+  return `<div class="page" style="height:calc(100vh - 56px - 48px);display:flex;flex-direction:column">
+    <div class="chat-wrap" style="flex:1">
+      <div class="chat-header">
+        <div class="avatar" style="background:var(--accent);font-size:20px">🤖</div>
+        <div class="chat-header-info">
+          <div class="chat-header-name">MediAssist AI</div>
+          <div class="chat-header-status"><div class="status-dot"></div>Active • ${state.lang==='ta'?'தமிழ் / ':''}English</div>
+        </div>
+        <button class="btn btn-ghost btn-sm" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="resetChat()">🔄 New Chat</button>
+      </div>
+      ${state.emergency?`<div class="emergency-banner">🚨 EMERGENCY DETECTED — Call 108 immediately or go to nearest Emergency Room!</div>`:''}
+      <div style="padding:10px 16px 0">
+        <div class="disclaimer-box">⚕ <strong>Medical Disclaimer:</strong> MediAssist AI provides general health information only. It is not a substitute for professional medical advice, diagnosis or treatment. In case of emergency, call 108.</div>
+      </div>
+      <div class="chat-messages" id="chatMsgs">
+        ${msgs.map(m=>`<div class="msg ${m.from}">
+          <div class="msg-row">
+            ${m.from==='bot'?`<div class="msg-avatar">🤖</div>`:''}
+            <div class="msg-bubble">${m.text.replace(/\n/g,'<br/>')}</div>
+            ${m.from==='user'?`<div class="avatar" style="width:28px;height:28px;font-size:11px">PK</div>`:''}
+          </div>
+          <div class="msg-time">${m.time}</div>
+        </div>`).join('')}
+        ${state.chatTyping?`<div class="msg bot"><div class="msg-row"><div class="msg-avatar">🤖</div><div class="msg-bubble" style="display:flex;gap:5px;align-items:center"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`:''}
+        ${state.chatStep===5&&!state.emergency&&msgs.length>8?`<div style="background:var(--primary-light);border-radius:10px;padding:14px;margin:4px 0;border:1px solid var(--primary)">
+          <div style="font-weight:700;color:var(--primary);margin-bottom:8px">📊 Symptom Summary</div>
+          <div style="font-size:12.5px;color:var(--text2);line-height:1.7">
+            <strong>Patient:</strong> ${state.chatData.name||'Patient'}, ${state.chatData.age||'--'} yrs, ${state.chatData.gender||'--'}<br/>
+            <strong>Symptoms:</strong> ${state.chatData.symptoms||'--'}<br/>
+            <strong>Duration:</strong> ${state.chatData.duration||'--'}<br/>
+            <strong>Severity:</strong> ${state.chatData.severity||'--'}/10<br/>
+            <strong>Medications:</strong> ${state.chatData.meds||'None'}<br/>
+            <strong>Allergies:</strong> ${state.chatData.allergies||'None'}
+          </div>
+          <div style="margin-top:10px"><strong style="font-size:13px">Risk Level:</strong>
+            <div class="risk-meter" style="margin-top:6px">
+              <div class="risk-block risk-active-low"></div>
+              <div class="risk-block ${parseInt(state.chatData.severity)>=5?'risk-active-mid':'risk-mid'}"></div>
+              <div class="risk-block ${parseInt(state.chatData.severity)>=8?'risk-active-high':'risk-high'}"></div>
+            </div>
+            <div style="font-size:11px;color:var(--text3);margin-top:3px">Severity: ${parseInt(state.chatData.severity)>=8?'HIGH — seek doctor urgently':parseInt(state.chatData.severity)>=5?'MODERATE — consult doctor soon':'LOW — self-care may help'}</div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn btn-primary btn-sm" onclick="setPage('appointments')">📅 Book Appointment</button>
+            <button class="btn btn-ghost btn-sm" onclick="setPage('doctors')">👨‍⚕ Find Doctors</button>
+          </div>
+        </div>`:''}
+      </div>
+      <div class="quick-actions">
+        ${['Headache','Fever','Cold & cough','Stomach pain','Dizziness'].map(s=>`<span class="quick-chip" onclick="sendQuick('${s}')">${s}</span>`).join('')}
+      </div>
+      <div class="chat-input-area">
+        <textarea class="chat-input" id="chatInput" placeholder="${state.lang==='ta'?'உங்கள் செய்தியை இங்கே தட்டச்சு செய்யவும்...':'Type your message...'}" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMsg()}"></textarea>
+        <div class="chat-send-btn" onclick="sendMsg()">➤</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderAppointments(){
+  return `<div class="page">
+    <div class="tabs">
+      <div class="tab ${state.activeTab===0?'active':''}" onclick="state.activeTab=0;rerender()">Upcoming</div>
+      <div class="tab ${state.activeTab===1?'active':''}" onclick="state.activeTab=1;rerender()">Past</div>
+      <div class="tab ${state.activeTab===2?'active':''}" onclick="state.activeTab=2;rerender()">Book New</div>
+    </div>
+    ${state.activeTab===2?`
+      <div class="card">
+        <div class="card-title" style="margin-bottom:16px">Book an Appointment</div>
+        <div class="grid-2" style="margin-bottom:16px">
+          <div class="form-group"><label class="form-label">Specialty</label>
+            <select class="form-input"><option>General Physician</option><option>Cardiologist</option><option>Dermatologist</option><option>Neurologist</option></select></div>
+          <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" value="2025-05-26"/></div>
+        </div>
+        <div class="form-group" style="margin-bottom:16px"><label class="form-label">Reason for Visit</label>
+          <textarea class="form-input" rows="2" placeholder="Describe your symptoms briefly..."></textarea></div>
+        <button class="btn btn-primary" onclick="alert('Appointment booked successfully! Dr. Priya Sharma — May 26, 10:30 AM')">📅 Confirm Booking</button>
+      </div>
+      <div class="card" style="margin-top:16px">
+        <div class="card-title" style="margin-bottom:14px">Available Doctors — Today</div>
+        <div class="grid-3">
+          ${DOCTORS.filter((_,i)=>i<3).map(d=>`<div class="doctor-card" onclick="alert('Booking with ${d.name}')">
+            <div class="doctor-avatar">${d.avatar}</div>
+            <div class="doctor-name">${d.name}</div>
+            <div class="doctor-spec">${d.spec}</div>
+            <div class="doctor-rating">★ ${d.rating}</div>
+            <div class="doctor-fee">${d.fee}</div>
+            <span class="badge badge-success">${d.avail}</span>
+          </div>`).join('')}
+        </div>
+      </div>
+    `:state.activeTab===1?`
+      <div class="card">
+        <div class="card-title" style="margin-bottom:14px">Past Consultations</div>
+        <table class="data-table">
+          <thead><tr><th>Date</th><th>Doctor</th><th>Type</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${[{date:'May 10, 2025',doc:'Dr. Priya Sharma',type:'General Checkup',status:'completed'},{date:'Apr 22, 2025',doc:'Dr. Arun Kumar',type:'Cardiology',status:'completed'},{date:'Mar 15, 2025',doc:'Dr. Meena Devi',type:'Dermatology',status:'completed'}].map(r=>`<tr>
+              <td>${r.date}</td><td style="font-weight:600">${r.doc}</td><td>${r.type}</td>
+              <td>${statusBadge(r.status)}</td>
+              <td><button class="btn btn-ghost btn-sm">📋 Notes</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    `:`
+      <div style="display:flex;flex-direction:column;gap:12px">
+        ${APPOINTMENTS.map(a=>`<div class="appt-card">
+          <div class="appt-time"><div class="time">${a.time}</div><div class="ampm">${a.ampm}</div><div style="font-size:10px;color:var(--text3);margin-top:2px">${a.date}</div></div>
+          <div class="appt-info">
+            <div class="appt-doctor">${a.doctor}</div>
+            <div class="appt-type">${a.type}</div>
+          </div>
+          ${statusBadge(a.status)}
+          <div class="appt-actions">
+            <button class="btn btn-primary btn-sm" onclick="setPage('video')">🎥 Join</button>
+            <button class="btn btn-ghost btn-sm">✏</button>
+            <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="this.closest('.appt-card').style.opacity='.4'">✗</button>
+          </div>
+        </div>`).join('')}
+      </div>
+    `}
+  </div>`;
+}
+
+function renderPrescriptions(){
+  return `<div class="page">
+    <div class="grid-2">
+      <div>
+        <div class="card mb-16">
+          <div class="card-header">
+            <div><div class="card-title">Latest Prescription</div><div class="card-subtitle">Dr. Priya Sharma • May 18, 2025</div></div>
+            <button class="btn btn-outline btn-sm" onclick="alert('PDF downloaded!')">↓ PDF</button>
+          </div>
+          <div class="rx-card">
+            <div class="rx-watermark">Rx</div>
+            <div style="margin-bottom:12px;padding-bottom:10px;border-bottom:1px dashed var(--border2)">
+              <div style="font-size:12px;color:var(--text3)">Patient: <strong>Priya Kumar</strong> • Age: 28 • Date: May 18, 2025</div>
+              <div style="font-size:12px;color:var(--text3);margin-top:2px">Diagnosis: Upper Respiratory Tract Infection</div>
+            </div>
+            ${PRESCRIPTIONS.map(p=>`<div class="rx-drug">
+              <span style="font-size:20px">${p.icon}</span>
+              <div><div class="drug-name">${p.drug}</div><div class="drug-dose">${p.dose}</div></div>
+            </div>`).join('')}
+            <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--border2);font-size:12px;color:var(--text3)">
+              <strong>Notes:</strong> Rest, plenty of fluids. Avoid cold foods. Follow up in 7 days if no improvement.
+            </div>
+            <div style="margin-top:10px;font-size:11px;color:var(--text3)">Signed: Dr. Priya Sharma, MBBS, MD • Reg. No: TN12345</div>
+          </div>
+        </div>
+        ${state.role==='doctor'?`<div class="card">
+          <div class="card-title" style="margin-bottom:14px">✍ Write New Prescription</div>
+          <div class="form-group"><label class="form-label">Patient</label><select class="form-input"><option>Ravi Krishnan</option><option>Anitha S.</option></select></div>
+          <div class="form-group"><label class="form-label">Diagnosis</label><input class="form-input" placeholder="Enter diagnosis..."/></div>
+          <div class="form-group"><label class="form-label">Medications</label><textarea class="form-input" rows="3" placeholder="Drug name, dosage, frequency, duration..."></textarea></div>
+          <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" rows="2" placeholder="Additional instructions..."></textarea></div>
+          <div style="display:flex;gap:8px"><button class="btn btn-primary" onclick="alert('Prescription saved and sent to patient!')">💊 Issue Prescription</button><button class="btn btn-ghost" onclick="alert('PDF generated!')">↓ PDF</button></div>
+        </div>`:''}
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">All Prescriptions</div></div>
+        ${[
+          {date:'May 18, 2025',doc:'Dr. Priya Sharma',diag:'URTI',count:3},
+          {date:'Apr 22, 2025',doc:'Dr. Arun Kumar',diag:'Hypertension',count:2},
+          {date:'Mar 15, 2025',doc:'Dr. Meena Devi',diag:'Eczema',count:2},
+          {date:'Jan 10, 2025',doc:'Dr. Kavya Nair',diag:'Vitamin Deficiency',count:1},
+        ].map(r=>`<div style="display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer" onclick="alert('Viewing prescription details')">
+          <div style="background:var(--primary-light);color:var(--primary);border-radius:8px;padding:8px 10px;font-size:11px;font-weight:700;white-space:nowrap">Rx</div>
+          <div style="flex:1">
+            <div style="font-weight:600;font-size:13.5px">${r.diag}</div>
+            <div style="font-size:11.5px;color:var(--text3)">${r.doc} • ${r.date}</div>
+          </div>
+          <span class="badge badge-gray">${r.count} meds</span>
+          <button class="btn btn-ghost btn-sm">↓</button>
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderRecords(){
+  return `<div class="page">
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Medical Records</div>
+          <button class="btn btn-primary btn-sm" onclick="alert('Upload functionality coming soon!')">+ Upload</button>
+        </div>
+        ${RECORDS.map(r=>`<div class="record-item">
+          <div class="record-icon" style="background:${r.color}">${r.icon}</div>
+          <div class="record-info"><div class="record-name">${r.name}</div><div class="record-date">${r.date}</div></div>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-ghost btn-sm">👁</button>
+            <button class="btn btn-ghost btn-sm">↓</button>
+          </div>
+        </div>`).join('')}
+        <div style="margin-top:14px;padding:12px;background:var(--surface2);border-radius:8px;font-size:12px;color:var(--text3)">
+          🔒 All records are encrypted and HIPAA compliant. Only you and authorized doctors can access them.
+        </div>
+      </div>
+      <div>
+        <div class="card mb-16">
+          <div class="card-title" style="margin-bottom:14px">Medical History</div>
+          ${[
+            {label:'Blood Group',value:'B+'},
+            {label:'Allergies',value:'Penicillin, Dust'},
+            {label:'Chronic Conditions',value:'None'},
+            {label:'Last Blood Pressure',value:'120/80 mmHg'},
+            {label:'Last Blood Sugar',value:'92 mg/dL (Fasting)'},
+          ].map(i=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--border)">
+            <span style="font-size:13px;color:var(--text3)">${i.label}</span>
+            <span style="font-size:13px;font-weight:600">${i.value}</span>
+          </div>`).join('')}
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">Vitals Trend</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            ${[['Blood Pressure','120/80','Normal',85],['Heart Rate','72 bpm','Normal',72],['Blood Sugar','92 mg/dL','Normal',60],['BMI','23.5','Healthy',70]].map(([l,v,s,p])=>`<div>
+              <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px">
+                <span style="color:var(--text2)">${l}</span>
+                <span style="font-weight:600">${v} <span class="badge badge-success" style="font-size:10px">${s}</span></span>
+              </div>
+              <div class="progress-bar"><div class="progress-fill" style="width:${p}%"></div></div>
+            </div>`).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderDoctors(){
+  return `<div class="page">
+    <div class="card mb-16">
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <input class="form-input" placeholder="Search by name or specialty..." style="flex:1;min-width:200px"/>
+        <select class="form-input" style="width:160px"><option>All Specialties</option><option>General</option><option>Cardiology</option><option>Dermatology</option></select>
+        <select class="form-input" style="width:140px"><option>Any Availability</option><option>Today</option><option>Tomorrow</option></select>
+        <button class="btn btn-primary">🔍 Search</button>
+      </div>
+    </div>
+    <div class="grid-3">
+      ${DOCTORS.map(d=>`<div class="doctor-card">
+        <div class="doctor-avatar">${d.avatar}</div>
+        <div class="doctor-name">${d.name}</div>
+        <div class="doctor-spec">${d.spec}</div>
+        <div class="doctor-rating">★ ${d.rating} • ${d.exp}</div>
+        <div class="doctor-fee">${d.fee} / consultation</div>
+        <span class="badge badge-success">Available ${d.avail}</span>
+        <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center;margin-top:4px" onclick="state.activeTab=2;setPage('appointments')">Book Appointment</button>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function renderProfile(){
+  return `<div class="page">
+    <div class="grid-2">
+      <div class="card">
+        <div style="text-align:center;padding:16px 0">
+          <div class="avatar" style="width:72px;height:72px;font-size:28px;margin:0 auto 12px">PK</div>
+          <div style="font-weight:700;font-size:18px">${state.role==='patient'?'Priya Kumar':state.role==='doctor'?'Dr. Arun Kumar':'Admin User'}</div>
+          <div style="color:var(--text3);font-size:13px;margin-top:2px">${state.role==='patient'?'Patient • ID: PAT-2025-1042':state.role==='doctor'?'Cardiologist • Reg: TN-DR-8821':'Administrator'}</div>
+          <div style="display:flex;gap:8px;justify-content:center;margin-top:12px">
+            <span class="badge badge-success">Verified</span>
+            ${state.role==='doctor'?'<span class="badge badge-info">Doctor</span>':''}
+          </div>
+        </div>
+        <div class="divider"></div>
+        ${[['Email','priya.kumar@email.com'],['Phone','+91 98765 43210'],['Location','Erode, Tamil Nadu'],['Language','English, Tamil']].map(([l,v])=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text3);font-size:13px">${l}</span><span style="font-size:13px;font-weight:500">${v}</span></div>`).join('')}
+      </div>
+      <div>
+        <div class="card mb-16">
+          <div class="card-title" style="margin-bottom:14px">Edit Profile</div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">First Name</label><input class="form-input" value="Priya"/></div>
+            <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" value="Kumar"/></div>
+          </div>
+          <div class="form-group"><label class="form-label">Date of Birth</label><input type="date" class="form-input" value="1997-03-15"/></div>
+          <div class="form-group"><label class="form-label">Blood Group</label><select class="form-input"><option>B+</option><option>A+</option><option>O+</option></select></div>
+          <div class="form-group"><label class="form-label">Allergies</label><input class="form-input" value="Penicillin, Dust"/></div>
+          <button class="btn btn-primary" onclick="alert('Profile updated successfully!')">Save Changes</button>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">Security & Privacy</div>
+          ${[['🔒','Change Password','Last changed 30 days ago'],['🔔','Notifications','Email & SMS enabled'],['🛡','Data Privacy','Your data is encrypted']].map(([icon,title,sub])=>`<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+            <span style="font-size:20px">${icon}</span>
+            <div style="flex:1"><div style="font-weight:500;font-size:13.5px">${title}</div><div style="font-size:11.5px;color:var(--text3)">${sub}</div></div>
+            <button class="btn btn-ghost btn-sm">Edit</button>
+          </div>`).join('')}
+          <div style="margin-top:12px"><button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="go('landing')">🚪 Sign Out</button></div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderQueue(){
+  if(state.role==='admin') return renderAdminUsers();
+  return `<div class="page">
+    <div class="card mb-16">
+      <div style="display:flex;gap:12px;align-items:center">
+        <span class="badge badge-danger" style="font-size:13px">3 Waiting</span>
+        <span class="badge badge-info" style="font-size:13px">1 In Progress</span>
+        <span class="badge badge-gray" style="font-size:13px">1 Scheduled</span>
+        <div style="margin-left:auto;display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="setPage('video')">🎥 Start Next Call</button>
+          <button class="btn btn-ghost btn-sm" onclick="setPage('schedule')">📅 View Schedule</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <table class="data-table">
+        <thead><tr><th>#</th><th>Patient</th><th>Symptoms</th><th>AI Risk</th><th>Time</th><th>Status</th><th>Action</th></tr></thead>
+        <tbody>
+          ${PATIENTS.map((p,i)=>`<tr>
+            <td style="color:var(--text3)">${i+1}</td>
+            <td><div class="patient-info"><div class="avatar" style="width:30px;height:30px;font-size:11px;background:var(--primary-light);color:var(--primary)">${p.name.split(' ').map(n=>n[0]).join('')}</div><div><div style="font-weight:600">${p.name}</div><div style="font-size:11px;color:var(--text3)">Age ${p.age}</div></div></div></td>
+            <td style="font-size:13px">${p.symptom}</td>
+            <td>${riskBadge(p.risk)}</td>
+            <td style="font-size:12px;color:var(--text3)">${p.time}</td>
+            <td>${statusBadge(p.status)}</td>
+            <td><button class="btn btn-primary btn-sm" onclick="setPage('video')">📹 Call</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderAdminUsers(){
+  return `<div class="page">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">User Management</div>
+        <div style="display:flex;gap:8px"><input class="form-input" placeholder="Search..." style="width:180px;padding:7px 12px;font-size:13px"/><button class="btn btn-primary btn-sm">+ Add User</button></div>
+      </div>
+      <table class="data-table">
+        <thead><tr><th>User</th><th>Role</th><th>Appointments</th><th>Joined</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${[...Array(6)].map((_,i)=>{
+            const names=['Priya Kumar','Dr. Arun K.','Ravi S.','Dr. Meena D.','Senthil P.','Kavitha R.'];
+            const roles=['Patient','Doctor','Patient','Doctor','Patient','Patient'];
+            return `<tr>
+              <td><div class="patient-info"><div class="avatar" style="width:28px;height:28px;font-size:11px;background:var(--primary-light);color:var(--primary)">${names[i].split(' ').map(n=>n[0]).join('')}</div><div style="font-weight:600">${names[i]}</div></div></td>
+              <td><span class="badge ${roles[i]==='Doctor'?'badge-info':'badge-gray'}">${roles[i]}</span></td>
+              <td>${Math.floor(Math.random()*20)+1}</td>
+              <td>May ${10+i}, 2025</td>
+              <td><span class="badge badge-success">Active</span></td>
+              <td><button class="btn btn-ghost btn-sm">Edit</button> <button class="btn btn-ghost btn-sm" style="color:var(--danger)">✗</button></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderSchedule(){
+  const days=['Mon 26','Tue 27','Wed 28','Thu 29','Fri 30'];
+  const times=['9:00','9:30','10:00','10:30','11:00','11:30'];
+  const slots={
+    '9:00-0':'Ravi K.','10:00-2':'Anitha S.','10:30-1':'Murugan P.','11:00-3':'Deepa L.',
+  };
+  return `<div class="page">
+    <div class="card mb-16">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="btn btn-ghost btn-sm">◀ Prev</button>
+        <div style="font-weight:600;flex:1;text-align:center">Week of May 26 – 30, 2025</div>
+        <button class="btn btn-ghost btn-sm">Next ▶</button>
+        <button class="btn btn-primary btn-sm" onclick="alert('Availability updated!')">💾 Save Availability</button>
+      </div>
+    </div>
+    <div class="card" style="overflow-x:auto">
+      <div class="schedule-grid" style="grid-template-columns:60px repeat(5,1fr)">
+        <div class="schedule-header"></div>
+        ${days.map(d=>`<div class="schedule-header">${d}</div>`).join('')}
+        ${times.map(t=>days.map((d,di)=>{
+          const key=`${t}-${di}`;
+          const booked=slots[key];
+          return `<div class="${booked?'schedule-slot booked':'schedule-slot'}" ${booked?`onclick="alert('Patient: ${booked}')"`:`onclick="alert('Slot ${t} ${d} — click to toggle availability')"`}>
+            ${booked?`<div class="slot-appt">${booked}<br/>${t}</div>`:`<div class="slot-avail" style="opacity:.5">Free</div>`}
+          </div>`;
+        }).reduce((a,b,i)=>i===0?`<div class="schedule-time">${t}</div>${b}`:a+b,'')).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderVideo(){
+  return `<div class="page">
+    <div class="grid-2">
+      <div>
+        <div class="card mb-16" style="padding:0;overflow:hidden">
+          <div class="video-room">
+            <div class="video-main-placeholder">
+              <div style="font-size:56px">👨‍⚕️</div>
+              <div style="font-weight:600;font-size:16px">Dr. Arun Kumar</div>
+              <div style="font-size:13px">Cardiologist</div>
+              <div style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border-radius:20px;padding:6px 14px;margin-top:4px">
+                <div style="width:8px;height:8px;background:#4ade80;border-radius:50%"></div>
+                <span style="font-size:12px">Live • 00:12:34</span>
+              </div>
+            </div>
+            <div class="video-self">👩 You</div>
+          </div>
+          <div class="video-controls" style="background:#12121e">
+            <div class="video-btn" onclick="this.style.opacity=this.style.opacity==='0.4'?'1':'0.4'">🎤</div>
+            <div class="video-btn" onclick="this.style.opacity=this.style.opacity==='0.4'?'1':'0.4'">📷</div>
+            <div class="video-btn" onclick="this.textContent=this.textContent==='🖥'?'⏹':'🖥'">🖥</div>
+            <div class="video-btn danger" onclick="go('app')">📴</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title" style="margin-bottom:12px">Session Notes</div>
+          <textarea class="form-input" rows="4" placeholder="Doctor's notes for this consultation..."></textarea>
+          <div style="margin-top:10px;display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="alert('Notes saved!')">💾 Save Notes</button>
+            <button class="btn btn-ghost btn-sm" onclick="setPage('prescriptions')">💊 Write Rx</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card mb-16">
+          <div class="card-title" style="margin-bottom:12px">Patient Info</div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+            <div class="avatar" style="width:46px;height:46px;font-size:18px;background:var(--primary-light);color:var(--primary)">RK</div>
+            <div>
+              <div style="font-weight:700;font-size:15px">Ravi Krishnan</div>
+              <div style="font-size:12px;color:var(--text3)">42 yrs • Male • B+</div>
+            </div>
+            ${riskBadge('high')}
+          </div>
+          <div class="symptom-tags">
+            <span class="symptom-tag">Chest pain</span>
+            <span class="symptom-tag">Shortness of breath</span>
+            <span class="symptom-tag symptom-tag-yellow">2 days duration</span>
+          </div>
+          <div class="divider"></div>
+          ${[['Allergies','Penicillin'],['Current Meds','Aspirin 75mg'],['Last Visit','March 3, 2025'],['Blood Pressure','142/90 mmHg']].map(([l,v])=>`<div style="display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-bottom:1px solid var(--border)"><span style="color:var(--text3)">${l}</span><span style="font-weight:500">${v}</span></div>`).join('')}
+        </div>
+        <div class="card" style="overflow:hidden">
+          <div class="card-title" style="margin-bottom:12px">AI-Generated Summary</div>
+          <div style="background:var(--primary-light);border-radius:8px;padding:12px;font-size:12.5px;color:var(--text2);line-height:1.7;border-left:3px solid var(--primary)">
+            Patient presents with <strong>chest pain and shortness of breath</strong> for 2 days. Severity rated 8/10. No known cardiac history. Current medication: Aspirin 75mg. BP elevated at 142/90 mmHg. Risk level: <strong style="color:var(--danger)">HIGH</strong>. Recommend ECG and cardiac enzyme tests immediately.
+          </div>
+          <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="alert('ECG order sent to patient!')">📋 Order ECG</button>
+            <button class="btn btn-ghost btn-sm" onclick="alert('Lab test ordered!')">🔬 Order Labs</button>
+            <button class="btn btn-ghost btn-sm" onclick="setPage('prescriptions')">💊 Prescribe</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Chat logic ──
+function addBotMsg(text){
+  const now=new Date();
+  state.chatMessages.push({from:'bot',text,time:`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`});
+}
+function addUserMsg(text){
+  const now=new Date();
+  state.chatMessages.push({from:'user',text,time:`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`});
+}
+function sendQuick(text){state.chatMessages.push({from:'user',text,time:new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})});processUserMsg(text);}
+function resetChat(){state.chatMessages=[];state.chatStep=0;state.chatData={};state.emergency=false;rerender();}
+
+function sendMsg(){
+  const input=$('chatInput');
+  if(!input||!input.value.trim()) return;
+  const text=input.value.trim();
+  input.value='';
+  addUserMsg(text);
+  processUserMsg(text);
+}
+
+function processUserMsg(text){
+  const t=T[state.lang];
+  // Emergency check
+  const lower=text.toLowerCase();
+  if(EMERGENCY_KEYWORDS.some(k=>lower.includes(k))){
+    state.emergency=true;
+    state.chatTyping=true;
+    rerender();
+    setTimeout(()=>{
+      state.chatTyping=false;
+      addBotMsg(t.emergencyMsg+'\n\n📞 Emergency: 108\n🏥 Nearest hospital guidance available.\n\nDo you need help finding the nearest hospital?');
+      rerender();
+    },800);
+    return;
+  }
+  state.chatTyping=true;
+  rerender();
+  setTimeout(()=>{
+    state.chatTyping=false;
+    const step=state.chatStep;
+    if(step===1){state.chatData.name=text;addBotMsg(t.askAge(text));state.chatStep=2;}
+    else if(step===2){state.chatData.age=text;addBotMsg(t.askGender);state.chatStep=3;}
+    else if(step===3){state.chatData.gender=text;addBotMsg(t.askSymptoms);state.chatStep=4;}
+    else if(step===4){state.chatData.symptoms=text;addBotMsg(t.askDuration);state.chatStep=4.5;}
+    else if(step===4.5){state.chatData.duration=text;addBotMsg(t.askSeverity);state.chatStep=4.7;}
+    else if(step===4.7){state.chatData.severity=text;addBotMsg(t.askMeds);state.chatStep=4.8;}
+    else if(step===4.8){state.chatData.meds=text;addBotMsg(t.askAllergies);state.chatStep=4.9;}
+    else if(step===4.9){
+      state.chatData.allergies=text;
+      addBotMsg(t.processing);
+      state.chatTyping=true;rerender();
+      setTimeout(()=>{
+        state.chatTyping=false;
+        const sev=parseInt(state.chatData.severity)||5;
+        const risk=sev>=8?'HIGH':sev>=5?'MODERATE':'LOW';
+        const recMsg=sev>=8?'⚠ URGENT: Please seek immediate medical attention or visit an ER.':sev>=5?'🩺 I recommend booking a doctor consultation soon.':'💙 You can start with self-care. Stay hydrated, rest well. Monitor symptoms.';
+        addBotMsg(`✅ Analysis complete!\n\nBased on your inputs, your risk level appears: **${risk}**\n\n${recMsg}\n\nI've prepared a full symptom summary below. Would you like to book an appointment with a doctor?`);
+        state.chatStep=5;
+        rerender();
+      },1500);
+      return;
+    }
+    else{
+      addBotMsg('Is there anything else I can help you with? You can book an appointment or explore our health resources.');
+    }
+    rerender();
+    setTimeout(()=>{const msgs=$('chatMsgs');if(msgs)msgs.scrollTop=msgs.scrollHeight;},100);
+  },900);
+}
+
+// ── Navigation ──
+function go(view){state.view=view;if(view==='app')state.activePage='dashboard';rerender();}
+function setPage(page){state.activePage=page;rerender();}
+function switchRole(role){state.role=role;state.activePage='dashboard';rerender();}
+function setLang(lang){state.lang=lang;rerender();}
+
+function rerender(){
+  const html=state.view==='landing'?renderLanding():state.view==='auth'?renderAuth():renderApp();
+  $('root').innerHTML=html;
+  bindEvents();
+  if(state.activePage==='chat'){
+    setTimeout(()=>{const msgs=$('chatMsgs');if(msgs)msgs.scrollTop=msgs.scrollHeight;},80);
+    if(state.chatMessages.length===0&&state.chatStep===0){
+      addBotMsg(T[state.lang].greeting);state.chatStep=1;rerender();
+    }
+  }
+}
+
+function bindEvents(){
+  // Auto resize textarea
+  const ta=$('chatInput');
+  if(ta) ta.addEventListener('input',function(){this.style.height='auto';this.style.height=Math.min(this.scrollHeight,90)+'px';});
+}
+
+// ── Init ──
+rerender();
+</script>
+</body>
+</html>
